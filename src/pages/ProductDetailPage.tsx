@@ -5,17 +5,20 @@ import { fetchAllProducts } from '@/services/productsApi';
 import { useCart } from '@/components/cart/CartProvider';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ProductImage from '@/components/product-detail/ProductImage';
 import ProductInfo from '@/components/product-detail/ProductInfo';
 import ProductOptions from '@/components/product-detail/ProductOptions';
 import RelatedProducts from '@/components/product-detail/RelatedProducts';
+import PersonalizationInput from '@/components/product-detail/PersonalizationInput';
 import TopNavbar from '@/components/TopNavbar';
 import BrandNavbar from '@/components/BrandNavbar';
 import MainNavbar from '@/components/MainNavbar';
 import Footer from '@/components/Footer';
 import BrandNavbarSection from '@/components/productsPages/BrandNavbarSection';
+import { savePersonalization } from '@/utils/personalizationStorage';
+
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -24,6 +27,7 @@ const ProductDetailPage = () => {
   const [selectedColor, setSelectedColor] = useState('Orange');
   const [quantity, setQuantity] = useState(1);
   const [personalization, setPersonalization] = useState('');
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['products'],
@@ -38,11 +42,16 @@ const ProductDetailPage = () => {
   const handleAddToCart = () => {
     if (!selectedSize) {
       toast({
-        title: "Please select a size",
-        description: "You must select a size before adding to cart",
+        title: "Veuillez sélectionner une taille",
+        description: "Une taille doit être sélectionnée avant d'ajouter au panier",
         variant: "destructive",
       });
       return;
+    }
+
+    // Save personalization if provided
+    if (personalization.trim()) {
+      savePersonalization(product!.id, personalization.trim());
     }
 
     addToCart({
@@ -54,8 +63,8 @@ const ProductDetailPage = () => {
     });
 
     toast({
-      title: "Added to cart",
-      description: `${quantity}x ${product!.name} (${selectedSize}) added to your cart`,
+      title: "Produit ajouté au panier",
+      description: `${quantity}x ${product!.name} (${selectedSize}) ajouté avec succès`,
       style: {
         backgroundColor: '#700100',
         color: 'white',
@@ -76,8 +85,8 @@ const ProductDetailPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Product not found</h2>
-          <Button onClick={() => navigate('/')}>Return to Home</Button>
+          <h2 className="text-2xl font-bold mb-4">Produit non trouvé</h2>
+          <Button onClick={() => navigate('/')}>Retour à l'accueil</Button>
         </div>
       </div>
     );
@@ -86,19 +95,27 @@ const ProductDetailPage = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <TopNavbar />
-         <BrandNavbarSection />
+      <BrandNavbarSection />
       <main className="flex-grow">
-      <div className="max-w-7xl mx-auto px-4 py-8 mt-[10px] lg:mt-[20px]">
+        <div className="max-w-7xl mx-auto px-4 py-8 mt-[10px] lg:mt-[20px]">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-gray-600 hover:text-[#700100] transition-colors mb-8 group"
           >
             <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-            <span>Back to Products</span>
+            <span>Retour aux produits</span>
           </button>
 
           <div className="grid lg:grid-cols-2 gap-12">
-            <ProductImage image={product.image} name={product.name} />
+            <div className="relative">
+              <button
+                onClick={() => setIsWishlisted(!isWishlisted)}
+                className="absolute right-4 top-4 z-10 p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
+              >
+                <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-[#700100] text-[#700100]' : 'text-gray-400'}`} />
+              </button>
+              <ProductImage image={product.image} name={product.name} />
+            </div>
 
             <div className="space-y-8">
               <ProductInfo 
@@ -116,25 +133,40 @@ const ProductDetailPage = () => {
                 setSelectedColor={setSelectedColor}
                 quantity={quantity}
                 setQuantity={setQuantity}
-                personalization={personalization}
-                setPersonalization={setPersonalization}
                 onAddToCart={handleAddToCart}
                 stock={10}
               />
+
+              <PersonalizationInput
+                value={personalization}
+                onChange={setPersonalization}
+              />
+
+              <Button
+                onClick={handleAddToCart}
+                className="w-full bg-[#700100] hover:bg-[#590000] text-white py-6 rounded-lg flex items-center justify-center gap-2 transition-all duration-300"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                <span className="font-medium">Ajouter au panier</span>
+              </Button>
             </div>
           </div>
 
           {relatedProducts && relatedProducts.length > 0 && (
-            <section className="mt-16 mb-8">
+            <motion.section 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mt-16 mb-8"
+            >
               <h2 className="text-2xl font-['WomanFontBold'] text-[#700100] mb-8">
-                You May Also Like
+                Vous aimerez aussi
               </h2>
               <RelatedProducts products={relatedProducts} />
-            </section>
+            </motion.section>
           )}
         </div>
       </main>
-
       <Footer />
     </div>
   );
