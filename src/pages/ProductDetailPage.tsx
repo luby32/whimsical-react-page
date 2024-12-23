@@ -11,13 +11,11 @@ import ProductImage from '@/components/product-detail/ProductImage';
 import ProductInfo from '@/components/product-detail/ProductInfo';
 import ProductOptions from '@/components/product-detail/ProductOptions';
 import RelatedProducts from '@/components/product-detail/RelatedProducts';
-import PersonalizationInput from '@/components/product-detail/PersonalizationInput';
 import TopNavbar from '@/components/TopNavbar';
 import BrandNavbar from '@/components/BrandNavbar';
 import MainNavbar from '@/components/MainNavbar';
 import Footer from '@/components/Footer';
 import BrandNavbarSection from '@/components/productsPages/BrandNavbarSection';
-import { savePersonalization } from '@/utils/personalizationStorage';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -26,7 +24,6 @@ const ProductDetailPage = () => {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('Orange');
   const [quantity, setQuantity] = useState(1);
-  const [personalization, setPersonalization] = useState('');
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const { data: products, isLoading } = useQuery({
@@ -47,11 +44,6 @@ const ProductDetailPage = () => {
         variant: "destructive",
       });
       return;
-    }
-
-    // Save personalization if provided
-    if (personalization.trim()) {
-      savePersonalization(product!.id, personalization.trim());
     }
 
     addToCart({
@@ -136,19 +128,6 @@ const ProductDetailPage = () => {
                 onAddToCart={handleAddToCart}
                 stock={10}
               />
-
-              <PersonalizationInput
-                value={personalization}
-                onChange={setPersonalization}
-              />
-
-              <Button
-                onClick={handleAddToCart}
-                className="w-full bg-[#700100] hover:bg-[#590000] text-white py-6 rounded-lg flex items-center justify-center gap-2 transition-all duration-300"
-              >
-                <ShoppingCart className="h-5 w-5" />
-                <span className="font-medium">Ajouter au panier</span>
-              </Button>
             </div>
           </div>
 
@@ -160,7 +139,7 @@ const ProductDetailPage = () => {
               className="mt-16 mb-8"
             >
               <h2 className="text-2xl font-['WomanFontBold'] text-[#700100] mb-8">
-                Vous aimerez aussi
+                Produits similaires
               </h2>
               <RelatedProducts products={relatedProducts} />
             </motion.section>
