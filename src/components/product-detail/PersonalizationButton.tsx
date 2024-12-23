@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { Text, Save } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { savePersonalization } from '@/utils/personalizationStorage';
+import { savePersonalization, getPersonalizations } from '@/utils/personalizationStorage';
 
 interface PersonalizationButtonProps {
   productId: number;
@@ -13,7 +13,10 @@ interface PersonalizationButtonProps {
 
 const PersonalizationButton = ({ productId, onSave }: PersonalizationButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [text, setText] = useState('');
+  const [text, setText] = useState(() => {
+    const personalizations = getPersonalizations();
+    return personalizations[productId] || '';
+  });
 
   const handleSave = () => {
     if (text.trim()) {
@@ -31,7 +34,7 @@ const PersonalizationButton = ({ productId, onSave }: PersonalizationButtonProps
       >
         <Button
           onClick={() => setIsOpen(true)}
-          className="w-full bg-white text-[#700100] border-2 border-[#700100] hover:bg-[#700100] hover:text-white transition-all duration-300 mt-4"
+          className="w-full bg-white text-[#700100] border-2 border-[#700100] hover:bg-[#700100] hover:text-white transition-all duration-300"
         >
           <Text className="mr-2 h-5 w-5" />
           Personnaliser votre produit
