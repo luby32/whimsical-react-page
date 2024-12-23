@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import ColorSelector from './product-detail/ColorSelector';
 import SizeSelector from './product-detail/SizeSelector';
 import QuantitySelector from './product-detail/QuantitySelector';
+import PersonalizationButton from './product-detail/PersonalizationButton';
 
 interface ProductDetailModalProps {
   isOpen: boolean;
@@ -29,19 +30,9 @@ const ProductDetailModal = ({ isOpen, onClose, product }: ProductDetailModalProp
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('');
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [personalization, setPersonalization] = useState('');
   const { addToCart } = useCart();
   const { toast } = useToast();
-  const [personalization, setPersonalization] = useState('');
-
-  const sizes = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'];
-  const colors = {
-    "Orange": "#DC6B48",
-    "White": "#FFFFFF",
-    "Gray": "#E5E5E5",
-    "Black": "#1A1A1A",
-    "Brown": "#8B4513",
-    "Sage": "#9CA88C"
-  };
 
   const handleAddToCart = () => {
     if (!selectedSize) {
@@ -58,7 +49,10 @@ const ProductDetailModal = ({ isOpen, onClose, product }: ProductDetailModalProp
       name: product.name,
       price: product.price,
       image: product.image,
-      quantity: quantity
+      quantity: quantity,
+      size: selectedSize,
+      color: product.color,
+      personalization: personalization
     });
 
     playTickSound();
@@ -122,13 +116,20 @@ const ProductDetailModal = ({ isOpen, onClose, product }: ProductDetailModalProp
 
               <ColorSelector
                 selectedColor={product.color}
-                colors={colors}
+                colors={{
+                  "Orange": "#DC6B48",
+                  "White": "#FFFFFF",
+                  "Gray": "#E5E5E5",
+                  "Black": "#1A1A1A",
+                  "Brown": "#8B4513",
+                  "Sage": "#9CA88C"
+                }}
                 onColorSelect={(color) => console.log('Selected color:', color)}
               />
 
               <SizeSelector
                 selectedSize={selectedSize}
-                sizes={sizes}
+                sizes={['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL']}
                 onSizeSelect={setSelectedSize}
               />
 
@@ -141,18 +142,10 @@ const ProductDetailModal = ({ isOpen, onClose, product }: ProductDetailModalProp
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-900">
-                  Personnalisation (optionnel)
-                </label>
-                <textarea
-                  value={personalization}
-                  onChange={(e) => setPersonalization(e.target.value)}
-                  placeholder="Ajoutez votre texte personnalisé ici..."
-                  className="w-full p-2 border border-gray-200 rounded-lg focus:ring-[#700100] focus:border-[#700100] text-sm resize-none"
-                  rows={2}
-                />
-              </div>
+              <PersonalizationButton
+                productId={product.id}
+                onSave={setPersonalization}
+              />
 
               <div className="space-y-3">
                 <Button

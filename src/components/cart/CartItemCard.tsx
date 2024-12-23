@@ -1,15 +1,7 @@
 import React from 'react';
-import { MinusCircle, PlusCircle, Trash2 } from 'lucide-react';
+import { MinusCircle, PlusCircle, Trash2, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
-import PersonalizationInput from './PersonalizationInput';
-
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+import { CartItem } from './CartProvider';
 
 interface CartItemCardProps {
   item: CartItem;
@@ -18,8 +10,6 @@ interface CartItemCardProps {
 }
 
 const CartItemCard = ({ item, onUpdateQuantity, onRemove }: CartItemCardProps) => {
-  const [, forceUpdate] = React.useState({});
-
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -39,6 +29,31 @@ const CartItemCard = ({ item, onUpdateQuantity, onRemove }: CartItemCardProps) =
             {item.name}
           </h3>
           <p className="text-[#8E9196] text-sm mb-3">Réf: {item.id.toString().padStart(6, '0')}</p>
+          
+          {(item.size || item.color) && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {item.size && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  Taille: {item.size}
+                </span>
+              )}
+              {item.color && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  Couleur: {item.color}
+                </span>
+              )}
+            </div>
+          )}
+
+          {item.personalization && (
+            <div className="mb-3 bg-[#F1F0FB] p-2 rounded-md">
+              <p className="text-sm text-gray-600 flex items-center gap-1">
+                <Tag className="h-4 w-4 text-[#700100]" />
+                Personnalisation: {item.personalization}
+              </p>
+            </div>
+          )}
+
           <div className="flex items-center gap-4 bg-[#F1F0FB] rounded-full px-4 py-1 w-fit">
             <button
               onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
@@ -56,11 +71,6 @@ const CartItemCard = ({ item, onUpdateQuantity, onRemove }: CartItemCardProps) =
               <PlusCircle size={20} />
             </button>
           </div>
-
-          <PersonalizationInput 
-            itemId={item.id} 
-            onUpdate={() => forceUpdate({})}
-          />
         </div>
         <div className="text-right">
           <div className="text-lg font-medium text-[#1A1F2C] mb-2">
